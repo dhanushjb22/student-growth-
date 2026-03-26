@@ -1,27 +1,4 @@
 {
-<<<<<<< HEAD
-  "name": "student-academic-growth-analyzer",
-  "version": "1.0.0",
-  "description": "Student Academic Growth Analyzer - Full Stack Application",
-  "scripts": {
-    "install-all": "cd backend && npm install && cd ../frontend && npm install",
-    "backend": "cd backend && npm run dev",
-    "frontend": "cd frontend && npm start",
-    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "start": "npm run dev"
-  },
-  "keywords": [
-    "student",
-    "academic",
-    "growth",
-    "analyzer",
-    "education"
-  ],
-  "author": "Dhanush Jolly",
-  "license": "ISC",
-  "devDependencies": {
-    "concurrently": "^8.2.2"
-=======
   "name": "student-growth-frontend",
   "version": "0.1.0",
   "private": true,
@@ -61,6 +38,5 @@
     "autoprefixer": "^10.4.24",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19"
->>>>>>> 602780091340e75d16217bcf2d96d4e1e5b5c2d1
   }
 }
