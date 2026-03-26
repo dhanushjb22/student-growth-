@@ -1,0 +1,9 @@
+const mongoose = require("mongoose");
+
+const attendanceSchema = new mongoose.Schema({
+  studentId: { type: mongoose.Schema.Types.ObjectId, ref: "Student" },
+  semester: String,
+  percentage: Number,
+}, { timestamps: true });
+
+module.exports = mongoose.model("Attendance", attendanceSchema);
