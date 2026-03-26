@@ -40,3 +40,7 @@
     "tailwindcss": "^3.4.19"
   }
 }
+{
+  "name": "frontend",
+  "version": "1.0.0"
+}
