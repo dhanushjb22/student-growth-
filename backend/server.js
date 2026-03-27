@@ -7,11 +7,13 @@ connectDB();
 
 const app = express();
 app.use(cors({
-  origin: [
-    "https://student-growth-zmb5-7wvflducv-dhanushjb22s-projects.vercel.app",
-    "https://student-growth-.vercel.app",
-    "http://localhost:3000"
-  ],
+  origin: function(origin, callback) {
+    if (!origin || origin.includes("vercel.app") || origin.includes("localhost")) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
