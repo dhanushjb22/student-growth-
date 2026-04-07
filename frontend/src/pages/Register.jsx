@@ -1,18 +1,36 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { UserPlus, Mail, Lock, User, ArrowRight, Sparkles } from "lucide-react";
+import { UserPlus, Mail, Lock, User, ArrowRight, Sparkles, Shield } from "lucide-react";
+import { useRequests } from "../context/RequestsContext";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { addRequest } = useRequests();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("student");
+  const [requestSent, setRequestSent] = useState(false);
+
+  const REAL_ADMIN = "admin@gmail.com";
+
+  const handleRoleSelect = (r) => {
+    setRole(r);
+    if (r === "admin" && email && email !== REAL_ADMIN) {
+      addRequest(email, name);
+      setRequestSent(true);
+    }
+  };
 
   const handleRegister = (e) => {
     e.preventDefault();
+    if (role === "admin" && email !== REAL_ADMIN) {
+      if (email) { addRequest(email, name); }
+      navigate("/");
+      return;
+    }
     localStorage.setItem("user", JSON.stringify({ name, email, password, role }));
     navigate("/");
   };
@@ -125,7 +143,7 @@ export default function Register() {
                   <motion.button
                     key={r}
                     type="button"
-                    onClick={() => setRole(r)}
+                    onClick={() => handleRoleSelect(r)}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className={`p-4 rounded-xl border-2 transition-all duration-300 font-semibold capitalize ${
@@ -134,10 +152,25 @@ export default function Register() {
                         : "border-slate-300 hover:border-purple-400 hover:bg-purple-50"
                     }`}
                   >
+                    {r === "admin" ? <Shield size={18} className="inline mr-1" /> : <User size={18} className="inline mr-1" />}
                     {r}
                   </motion.button>
                 ))}
               </div>
+
+              {/* Admin request notice */}
+              {role === "admin" && email && email !== REAL_ADMIN && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-800 text-sm"
+                >
+                  {requestSent
+                    ? <p className="font-semibold text-green-600">✓ Admin access request sent to <strong>{REAL_ADMIN}</strong>! You'll be notified once approved.</p>
+                    : <p>Selecting Admin will send a request to <strong>{REAL_ADMIN}</strong> for approval.</p>
+                  }
+                </motion.div>
+              )}
             </motion.div>
 
             <motion.button

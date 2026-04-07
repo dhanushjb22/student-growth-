@@ -7,11 +7,13 @@ import {
   BarChart2,
   LogOut,
   Shield,
-  TrendingUp
+  TrendingUp,
+  UserCheck
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
+import { useState, useEffect } from "react";
 
 export default function AdminSidebar() {
   const { logout } = useAuth();
@@ -22,6 +24,19 @@ export default function AdminSidebar() {
     navigate("/");
   };
 
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    const update = () => {
+      const reqs = JSON.parse(localStorage.getItem("adminAccessRequests") || "[]");
+      setPendingCount(reqs.filter((r) => r.status === "pending").length);
+    };
+    update();
+    window.addEventListener("storage", update);
+    const interval = setInterval(update, 2000);
+    return () => { window.removeEventListener("storage", update); clearInterval(interval); };
+  }, []);
+
   const menuItems = [
     { to: "/admin", icon: Users, label: "Students", end: true, gradient: "from-blue-500 to-cyan-600" },
     { to: "/admin/subjects", icon: BookOpen, label: "Subjects", gradient: "from-purple-500 to-pink-600" },
@@ -30,6 +45,7 @@ export default function AdminSidebar() {
     { to: "/admin/reports", icon: FileText, label: "Student Reports", gradient: "from-indigo-500 to-purple-600" },
     { to: "/admin/class-performance", icon: BarChart2, label: "Class Performance", gradient: "from-pink-500 to-rose-600" },
     { to: "/admin/analytics", icon: TrendingUp, label: "Analytics", gradient: "from-teal-500 to-cyan-600" },
+    { to: "/admin/access-requests", icon: UserCheck, label: "Access Requests", gradient: "from-amber-500 to-orange-600", badge: pendingCount },
   ];
 
   return (
@@ -135,7 +151,12 @@ export default function AdminSidebar() {
                   <span className={`relative font-medium ${isActive ? "text-white" : "text-slate-300"}`}>
                     {item.label}
                   </span>
-                  {isActive && (
+                  {item.badge > 0 && (
+                    <span className="ml-auto bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      {item.badge}
+                    </span>
+                  )}
+                  {isActive && !item.badge && (
                     <motion.div
                       className={`ml-auto w-2 h-2 rounded-full bg-gradient-to-r ${item.gradient}`}
                       initial={{ scale: 0 }}

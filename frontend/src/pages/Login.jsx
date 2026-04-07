@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useRequests } from "../context/RequestsContext";
 import { GraduationCap, Mail, Lock, ArrowRight, Sparkles, User, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import { GoogleLogin } from '@react-oauth/google';
@@ -8,16 +9,25 @@ import { GoogleLogin } from '@react-oauth/google';
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { addRequest } = useRequests();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("student");
   const [loading, setLoading] = useState(false);
+  const [adminRequestSent, setAdminRequestSent] = useState(false);
+
+  const REAL_ADMIN = "admin@gmail.com";
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const decoded = JSON.parse(atob(credentialResponse.credential.split('.')[1]));
       const googleEmail = decoded.email;
       const googleName = decoded.name;
+
+      if (role === "admin" && googleEmail !== REAL_ADMIN) {
+        alert("You are not authorized as admin. Please request admin access.");
+        return;
+      }
 
       if (role === "student") {
         const checkRes = await fetch(`http://localhost:5000/api/students/email/${googleEmail}`);
@@ -42,12 +52,24 @@ export default function Login() {
     }
   };
 
+  const handleAdminRequest = () => {
+    addRequest(email);
+    setAdminRequestSent(true);
+    setTimeout(() => setAdminRequestSent(false), 3000);
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) {
       alert("Please enter email & password");
       return;
     }
+
+    if (role === "admin" && email !== REAL_ADMIN) {
+      alert("You are not authorized as admin. Please request admin access.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -277,7 +299,14 @@ export default function Login() {
 
                 <motion.button
                   type="button"
-                  onClick={() => setRole("admin")}
+                  onClick={() => {
+                    setRole("admin");
+                    if (email && email !== REAL_ADMIN) {
+                      addRequest(email);
+                      setAdminRequestSent(true);
+                      setTimeout(() => setAdminRequestSent(false), 3000);
+                    }
+                  }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className={`relative p-4 rounded-xl border-2 transition-all duration-300 ${
@@ -291,6 +320,28 @@ export default function Login() {
                 </motion.button>
               </div>
             </motion.div>
+
+            {/* Admin Request Banner */}
+            {role === "admin" && email && email !== REAL_ADMIN && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 text-sm"
+              >
+                <p className="mb-2">Only <span className="font-bold text-yellow-200">{REAL_ADMIN}</span> is the real admin.</p>
+                {adminRequestSent ? (
+                  <p className="text-green-400 font-semibold">✓ Request sent to admin!</p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleAdminRequest}
+                    className="underline text-yellow-200 hover:text-white font-semibold"
+                  >
+                    Request Admin Access →
+                  </button>
+                )}
+              </motion.div>
+            )}
 
             {/* Login Button */}
             <motion.button

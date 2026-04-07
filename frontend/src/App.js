@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { RequestsProvider } from "./context/RequestsContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import StudentDashboard from "./pages/StudentDashboard";
@@ -7,6 +8,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   return (
+    <RequestsProvider>
     <AuthProvider>
       <BrowserRouter>
         <Routes>
@@ -17,6 +19,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+    </RequestsProvider>
   );
 }
 

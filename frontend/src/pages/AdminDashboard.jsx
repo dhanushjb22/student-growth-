@@ -8,6 +8,8 @@ import AdminAttendance from "../admincomp/AdminAttendance";
 import AdminStudentReports from "../admincomp/AdminStudentReports";
 import AdminClassPerformance from "../admincomp/AdminClassPerformance";
 import AdminAnalytics from "./AdminAnalytics";
+import AdminAccessRequests from "../admincomp/AdminAccessRequests";
+import AdminNotifications from "../components/AdminNotifications";
 
 export default function AdminDashboard() {
   return (
@@ -49,6 +51,8 @@ export default function AdminDashboard() {
         <AdminSidebar />
       </div>
 
+      <AdminNotifications />
+
       {/* Main Content */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -64,6 +68,7 @@ export default function AdminDashboard() {
           <Route path="reports" element={<AdminStudentReports />} />
           <Route path="class-performance" element={<AdminClassPerformance />} />
           <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="access-requests" element={<AdminAccessRequests />} />
         </Routes>
       </motion.div>
     </div>

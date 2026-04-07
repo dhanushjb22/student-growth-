@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import { Users, Plus, Search, Trash2, Edit } from "lucide-react";
+import { Users, Plus, Search, Trash2, Edit, CheckCircle, XCircle, Bell } from "lucide-react";
 
 export default function AdminStudents() {
   const navigate = useNavigate();
@@ -16,6 +16,7 @@ export default function AdminStudents() {
   });
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [requests, setRequests] = useState([]);
 
   const fetchStudents = async () => {
     try {
@@ -79,8 +80,82 @@ export default function AdminStudents() {
     s.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  useEffect(() => {
+    const update = () => {
+      const stored = JSON.parse(localStorage.getItem("adminAccessRequests") || "[]");
+      setRequests(stored);
+    };
+    update();
+    const interval = setInterval(update, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const updateRequest = (index, status) => {
+    const all = JSON.parse(localStorage.getItem("adminAccessRequests") || "[]");
+    all[index].status = status;
+    all[index].resolvedAt = new Date().toLocaleString();
+    localStorage.setItem("adminAccessRequests", JSON.stringify(all));
+    setRequests([...all]);
+  };
+
+  const pendingRequests = requests.filter(r => r.status === "pending");
+
   return (
     <div className="space-y-6">
+
+      {/* Admin Access Requests Notification */}
+      <AnimatePresence>
+        {pendingRequests.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/30 rounded-2xl p-5"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Bell size={20} className="text-amber-400" />
+              <h2 className="text-lg font-bold text-amber-400">Pending Admin Access Requests ({pendingRequests.length})</h2>
+            </div>
+            <div className="space-y-3">
+              {requests.map((req, i) =>
+                req.status === "pending" ? (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/5 border border-white/10 rounded-xl p-4"
+                  >
+                    <div>
+                      <p className="text-white font-semibold">{req.email}</p>
+                      <p className="text-xs text-slate-400">Requested at: {req.requestedAt}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => updateRequest(i, "approved")}
+                        className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl text-sm font-semibold"
+                      >
+                        <CheckCircle size={15} /> Approve
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => updateRequest(i, "rejected")}
+                        className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl text-sm font-semibold"
+                      >
+                        <XCircle size={15} /> Reject
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                ) : null
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
