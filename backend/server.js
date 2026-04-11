@@ -23,6 +23,7 @@ app.use("/api/students", require("./routes/studentRoutes"));
 app.use("/api/subjects", require("./routes/subjectRoutes"));
 app.use("/api/marks", require("./routes/marksRoutes"));
 app.use("/api/attendance", require("./routes/attendanceRoutes"));
+app.use("/api/requests", require("./routes/requestRoutes"));
 
 app.get("/", (req,res)=>res.send("API Running"));
 
